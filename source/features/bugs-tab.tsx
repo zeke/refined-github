@@ -61,25 +61,15 @@ async function init(): Promise<void | false> {
 	select('a', issuesTab)!.removeAttribute('data-selected-links');
 
 	// Update its appearance
-	const bugsTabTitle = select('[data-content]', bugsTab);
-	if (bugsTabTitle) {
-		bugsTabTitle.dataset.content = 'Bugs';
-		bugsTabTitle.textContent = 'Bugs';
-		select('.octicon', bugsTab)!.replaceWith(<BugIcon className="UnderlineNav-octicon d-none d-sm-inline"/>);
+	const bugsTabTitle = select('[data-content]', bugsTab)!;
+	bugsTabTitle.dataset.content = 'Bugs';
+	bugsTabTitle.textContent = 'Bugs';
+	select('.octicon', bugsTab)!.replaceWith(<BugIcon className="UnderlineNav-octicon d-none d-sm-inline"/>);
 
-		// Un-select one of the tabs if necessary
-		const selectedTabLink = !isBugsPage || pageDetect.isPRList() ? bugsLink : select('.selected', issuesTab);
-		selectedTabLink?.classList.remove('selected');
-		selectedTabLink?.removeAttribute('aria-current');
-	} else {
-		// Pre "Repository refresh" layout
-		select('[itemprop="name"]', bugsTab)!.textContent = 'Bugs';
-		select('.octicon', bugsTab)!.replaceWith(<BugIcon/>);
-
-		// Change the Selected tab if necessary
-		bugsLink.classList.toggle('selected', isBugsPage && !pageDetect.isPRList());
-		select('.selected', issuesTab)?.classList.toggle('selected', !isBugsPage);
-	}
+	// Un-select one of the tabs if necessary
+	const selectedTabLink = !isBugsPage || pageDetect.isPRList() ? bugsLink : select('.selected', issuesTab);
+	selectedTabLink?.classList.remove('selected');
+	selectedTabLink?.removeAttribute('aria-current');
 
 	// Set temporary counter
 	const bugsCounter = select('.Counter', bugsTab)!;
