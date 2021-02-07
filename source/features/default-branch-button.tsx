@@ -43,14 +43,8 @@ async function init(): Promise<false | void> {
 		</a>
 	);
 
-	if (branchSelector.classList.contains('btn-sm')) {
-		// Pre "Repository refresh" layout
-		defaultLink.classList.add('btn-sm');
-	}
-
 	branchSelector.parentElement!.before(defaultLink);
 	groupButtons([defaultLink, branchSelector.parentElement!]).classList.add('d-flex');
-	branchSelector.style.float = 'none'; // Pre "Repository refresh" layout
 }
 
 void features.add(__filebasename, {
