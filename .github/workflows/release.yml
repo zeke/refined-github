@@ -15,6 +15,7 @@ jobs:
     outputs:
       created: ${{ steps.daily-version.outputs.created }}
       version: ${{ steps.daily-version.outputs.version }}
+      release_upload: ${{ steps.release.outputs.release_upload_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,18 +29,13 @@ jobs:
         id: daily-version
       - uses: notlmn/release-with-changelog@v3
         if: steps.daily-version.outputs.created
+        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           exclude: true
-  Submit:
+  Upload:
     needs: Version
     if: github.event_name == 'workflow_dispatch' || needs.Version.outputs.created
-    strategy:
-      fail-fast: false
-      matrix:
-        command:
-          - firefox
-          - chrome
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -50,6 +46,33 @@ jobs:
         run: >-
           npx dot-json@1 $DIRECTORY/manifest.json version ${{
           needs.Version.outputs.version }}
+      - run: npx web-ext build
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.Version.outputs.created.releas_upload }}
+          asset_path: ./my-artifact.zip
+          asset_name: my-artifact.zip
+          asset_content_type: application/zip
+      - uses: actions/upload-artifact@v2 # Store it for Submit
+        with:
+          path: distribution
+  Submit:
+    needs: Upload
+    if: github.event_name == 'workflow_dispatch' || needs.Version.outputs.created
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - firefox
+          - chrome
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifact
+          path: distribution
       - name: Submit
         run: |
           case ${{ matrix.command }} in
